@@ -1,9 +1,12 @@
 package com.mycompany.app;
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import java.util.ArrayList;
+import java.io.*;
+import javax.swing.*;
+import java.awt.Component;
+import java.lang.reflect.Field;
 
 public class AppTest {
     private Game game;
@@ -28,6 +31,8 @@ public class AppTest {
         game.symbol = 'X';
         assertEquals(State.XWIN, game.checkState(board));
     }
+
+
 
     @Test
     public void testCheckStateOWinsAntiDiagonal() {
@@ -185,5 +190,47 @@ public class AppTest {
         game.MiniMax(board, playerO);
         // Не можем проверить вывод, но можем проверить что выполняется без ошибок
         assertTrue(true);
+    }
+
+    @Nested
+    class PanelAndProgramTests {
+        @Test
+        void testTicTacToePanelInit() throws Exception {
+            TicTacToePanel panel = new TicTacToePanel(new java.awt.GridLayout(3,3));
+            assertEquals(9, panel.getComponentCount());
+            for (Component comp : panel.getComponents()) {
+                assertTrue(comp instanceof TicTacToeCell);
+                TicTacToeCell cell = (TicTacToeCell) comp;
+                assertEquals(' ', cell.getMarker());
+            }
+            Field gameField = TicTacToePanel.class.getDeclaredField("game");
+            gameField.setAccessible(true);
+            Game internalGame = (Game) gameField.get(panel);
+            assertEquals('X', internalGame.cplayer.symbol);
+        }
+
+        @Test
+        void testProgramMainRuns() {
+            assertDoesNotThrow(() -> Program.main(new String[0]));
+        }
+    }
+
+
+    @Nested
+    class TicTacToeCellTests {
+        @Test
+        void testCellInitialization() {
+            TicTacToeCell cell = new TicTacToeCell(0, 0, 0);
+            assertEquals(' ', cell.getMarker());
+            assertEquals(0, cell.getNum());
+        }
+
+        @Test
+        void testCellMarkerUpdate() {
+            TicTacToeCell cell = new TicTacToeCell(0, 0, 0);
+            cell.setMarker("X");
+            assertEquals('X', cell.getMarker());
+            assertFalse(cell.isEnabled());
+        }
     }
 }
